@@ -77,12 +77,22 @@ export const sendDailyNewsSummary = inngest.createFunction(
         try {
           const symbols = await getWatchlistSymbolsByEmail(user.email);
           let articles = await getNews(symbols);
+      const perUser: Array<{
+        user: UserForNewsEmail;
+        articles: MarketNewsArticle[];
+      }> = [];
+      let generalNewsCache: MarketNewsArticle[] | null = null;
+
+      // …inside your per-user loop…
+
           // Enforce max 6 articles per user
           articles = (articles || []).slice(0, 6);
           // If still empty, fallback to general
           if (!articles || articles.length === 0) {
-            articles = await getNews();
-            articles = (articles || []).slice(0, 6);
+            if (!generalNewsCache) {
+              generalNewsCache = (await getNews()) ?? [];
+            }
+            articles = generalNewsCache.slice(0, 6);
           }
           perUser.push({ user, articles });
         } catch (e) {
