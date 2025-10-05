@@ -27,9 +27,7 @@ async function fetchJSON<T>(
 
 export { fetchJSON };
 
-export async function getNews(
-  symbols?: string[]
-): Promise<MarketNewsArticle[]> {
+export async function getNews(symbols?: string[]): Promise<MarketNewsArticle[]> {
   try {
     const range = getDateRange(5);
     const token = process.env.FINNHUB_API_KEY ?? NEXT_PUBLIC_FINNHUB_API_KEY;
@@ -177,10 +175,12 @@ export const searchStocks = cache(
         .map((r) => {
           const upper = (r.symbol || "").toUpperCase();
           const name = r.description || upper;
+          const exchangeFromDisplay =
+            (r.displaySymbol as string | undefined) || undefined;
           const exchangeFromProfile = (r as any).__exchange as
             | string
             | undefined;
-          const exchange = exchangeFromProfile || "US";
+          const exchange = exchangeFromDisplay || exchangeFromProfile || "US";
           const type = r.type || "Stock";
           const item: StockWithWatchlistStatus = {
             symbol: upper,
